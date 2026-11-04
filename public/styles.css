@@ -11,10 +11,10 @@
   --pressed: inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light);
   --pressed-sm: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
   --text: #3b4556;
-  --text-dim: #6f7a8c;
-  --accent: #5b6cf0;
-  --danger: #e0566b;
-  --success: #2fb67c;
+  --text-dim: #5a6577;
+  --accent: #4453d6;
+  --danger: #b8334b;
+  --success: #1f8a5c;
   --radius: 20px;
 }
 
