@@ -1,11 +1,11 @@
 // Service worker: makes the app installable and usable offline.
-// - App shell (HTML/CSS/JS/icons): served from cache, refreshed in the background.
+// - App shell (HTML/CSS/JS/icons): network first, cached copy when offline.
 // - API reads (GET /api/...): network first, falling back to the last cached copy.
 // - API writes and logins: always go to the network.
 // Bump SHELL_CACHE when shell files change so old caches get cleared.
 importScripts("config.js"); // sets self.API_BASE
 
-const SHELL_CACHE = "community-board-v3";
+const SHELL_CACHE = "community-board-v4";
 const API_CACHE = "community-board-api"; // must match app.js
 const SHELL = ["./", "index.html", "styles.css", "app.js", "config.js", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
@@ -56,20 +56,18 @@ self.addEventListener("fetch", (event) => {
 
   if (new URL(req.url).origin !== self.location.origin) return;
 
+  // App files: network first so updates show up right away; cached copy when offline.
   // Page navigations all use the single app shell.
   const key = req.mode === "navigate" ? indexUrl : req;
   event.respondWith(
-    caches.match(key, { cacheName: SHELL_CACHE }).then((cached) => {
-      const network = fetch(req)
-        .then((res) => {
-          if (res.ok) {
-            const copy = res.clone();
-            caches.open(SHELL_CACHE).then((c) => c.put(key, copy));
-          }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || network;
-    })
+    fetch(req, { cache: "no-cache" })
+      .then((res) => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(SHELL_CACHE).then((c) => c.put(key, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(key, { cacheName: SHELL_CACHE }))
   );
 });
