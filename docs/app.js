@@ -31,11 +31,22 @@ async function api(path, { method = "GET", body } = {}) {
   if (body) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
   let res;
+  // Render's free plan can take ~60s to wake up; give up after 90s instead of hanging forever.
+  const timeout = new AbortController();
+  const timer = setTimeout(() => timeout.abort(), 90000);
   try {
-    res = await fetch(`${self.API_BASE}/api${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    res = await fetch(`${self.API_BASE}/api${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: timeout.signal,
+    });
   } catch {
-    throw new Error("Can't reach the server. Check your connection and try again.");
+    throw new Error("Can't reach the server. It may be starting up or down. Try again in a minute.");
+  } finally {
+    clearTimeout(timer);
   }
+  if (res.status === 502 || res.status === 503) throw new Error("The server is starting up or unavailable. Try again in a minute.");
   if (res.status === 204) return null;
   const data = await res.json().catch(() => ({}));
   if (res.status === 401 && token && !path.startsWith("/auth/")) {
@@ -146,16 +157,23 @@ function authView(mode) {
   form.onsubmit = async (e) => {
     e.preventDefault();
     const btn = form.querySelector("button");
+    const label = btn.textContent;
+    const errorEl = document.getElementById("auth-error");
     btn.disabled = true;
+    btn.textContent = isLogin ? "Logging in…" : "Creating account…";
+    errorEl.textContent = "";
+    const slow = setTimeout(() => (errorEl.textContent = "Waking up the server… this can take up to a minute."), 4000);
     try {
       const { token: t, member } = await api(`/auth/${mode}`, { method: "POST", body: Object.fromEntries(new FormData(form)) });
       saveSession(t, member);
       toast(isLogin ? `Welcome back, ${member.name}` : `Welcome, ${member.name}!`);
       location.hash = "#/issues";
     } catch (err) {
-      document.getElementById("auth-error").textContent = err.message;
+      errorEl.textContent = err.message;
     } finally {
+      clearTimeout(slow);
       btn.disabled = false;
+      btn.textContent = label;
     }
   };
 }

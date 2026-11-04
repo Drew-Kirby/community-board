@@ -5,7 +5,7 @@
 // Bump SHELL_CACHE when shell files change so old caches get cleared.
 importScripts("config.js"); // sets self.API_BASE
 
-const SHELL_CACHE = "community-board-v2";
+const SHELL_CACHE = "community-board-v3";
 const API_CACHE = "community-board-api"; // must match app.js
 const SHELL = ["./", "index.html", "styles.css", "app.js", "config.js", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
