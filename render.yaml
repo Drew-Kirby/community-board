@@ -5,4 +5,4 @@ services:
     plan: free
     buildCommand: "true"
     startCommand: node server.js
-    healthCheckPath: /api/issues
+    healthCheckPath: /api/health

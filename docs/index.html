@@ -5,26 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Community Board</title>
   <meta name="theme-color" content="#e4e9f2" />
-  <meta name="description" content="Members, issues, and tasks for a community." />
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <meta name="description" content="Members, issues, tasks, and comments for a community." />
+  <!-- Relative paths so the app works from github.io/community-board/ as well as localhost -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Community" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="neu topbar">
     <a href="#/issues" class="brand">
       <span class="logo">◈</span> Community Board
     </a>
-    <nav>
+    <nav id="nav" hidden>
       <a href="#/issues" data-nav="issues">Issues</a>
       <a href="#/members" data-nav="members">Members</a>
+      <a href="#/profile" data-nav="profile" id="nav-me">Profile</a>
+      <button class="btn small ghost" id="logout" type="button">Log out</button>
     </nav>
   </header>
 
-  <main id="app"></main>
+  <main id="app"><div class="neu empty">Loading…</div></main>
 
   <!-- Reusable modal -->
   <dialog id="modal" class="neu modal">
@@ -41,10 +44,11 @@
 
   <div id="toast" class="neu toast" role="status"></div>
 
-  <script src="/app.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js"));
+      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
     }
   </script>
 </body>
