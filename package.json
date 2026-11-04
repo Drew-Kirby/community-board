@@ -1,0 +1,13 @@
+{
+  "name": "community-board",
+  "version": "1.0.0",
+  "description": "Members, issues, and tasks for a community. Glassmorphism UI.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "license": "MIT"
+}
