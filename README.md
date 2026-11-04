@@ -1,6 +1,6 @@
 # Community Board
 
-A community app with **members**, **issues**, and **tasks**, styled with glassmorphism.
+A community app with **members**, **issues**, and **tasks**, styled with neumorphism.
 
 - **Member**: a person in the community (e.g. Susan).
 - **Issue**: something happening (e.g. Potluck). Everyone can see every issue.

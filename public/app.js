@@ -89,7 +89,7 @@ async function issuesView() {
     ${
       issues.length
         ? `<div class="grid">${issues.map(issueCard).join("")}</div>`
-        : `<div class="glass empty">No issues yet. Start one, like a potluck or a cleanup day.</div>`
+        : `<div class="neu empty">No issues yet. Start one, like a potluck or a cleanup day.</div>`
     }`;
   document.getElementById("new-issue").onclick = () => issueForm();
 }
@@ -97,7 +97,7 @@ async function issuesView() {
 function issueCard(i) {
   const pct = i.task_count ? Math.round((i.done_count / i.task_count) * 100) : 0;
   return `
-    <a class="glass card" href="#/issues/${i.id}">
+    <a class="neu card" href="#/issues/${i.id}">
       <h3>${esc(i.title)}</h3>
       <p class="desc">${esc(i.description) || "<em>No description</em>"}</p>
       <div class="meta">
@@ -144,7 +144,7 @@ async function issueDetailView(id) {
 
   app.innerHTML = `
     <a class="back" href="#/issues">← All issues</a>
-    <section class="glass detail">
+    <section class="neu detail">
       <div class="page-head" style="margin-bottom:8px">
         <h1>${esc(issue.title)}</h1>
         <div class="detail-actions">
@@ -161,7 +161,7 @@ async function issueDetailView(id) {
       <div class="progress"><span style="width:${pct}%"></span></div>
     </section>
 
-    <section class="glass panel">
+    <section class="neu panel">
       <h2>Tasks</h2>
       ${
         members.length
@@ -260,7 +260,7 @@ async function membersView() {
         ? `<div class="grid">${members
             .map(
               (m) => `
-              <a class="glass card member-row" href="#/members/${m.id}">
+              <a class="neu card member-row" href="#/members/${m.id}">
                 <span class="avatar">${esc(initials(m.name))}</span>
                 <div>
                   <h3>${esc(m.name)}</h3>
@@ -269,7 +269,7 @@ async function membersView() {
               </a>`
             )
             .join("")}</div>`
-        : `<div class="glass empty">No members yet.</div>`
+        : `<div class="neu empty">No members yet.</div>`
     }`;
 
   document.getElementById("new-member").onclick = () =>
@@ -296,7 +296,7 @@ async function memberDetailView(id) {
 
   app.innerHTML = `
     <a class="back" href="#/members">← All members</a>
-    <section class="glass detail">
+    <section class="neu detail">
       <div class="page-head" style="margin-bottom:0">
         <div class="member-row">
           <span class="avatar">${esc(initials(m.name))}</span>
@@ -308,7 +308,7 @@ async function memberDetailView(id) {
         <button class="btn small danger" id="delete-member">Remove member</button>
       </div>
     </section>
-    <section class="glass panel">
+    <section class="neu panel">
       <h2>${esc(m.name)}'s tasks</h2>
       ${
         byIssue.size
@@ -343,7 +343,7 @@ async function route() {
     if (section === "members") return id ? await memberDetailView(id) : await membersView();
     return id ? await issueDetailView(id) : await issuesView();
   } catch (err) {
-    app.innerHTML = `<div class="glass empty">${esc(err.message)}<br /><br /><a href="#/issues">Back to issues</a></div>`;
+    app.innerHTML = `<div class="neu empty">${esc(err.message)}<br /><br /><a href="#/issues">Back to issues</a></div>`;
   }
 }
 
