@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Board</title>
+  <style>
+/* ---------- Glassmorphism theme ---------- */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.14);
+  --glass-bg-strong: rgba(255, 255, 255, 0.22);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-shadow: 0 8px 32px rgba(15, 10, 40, 0.28);
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.72);
+  --accent: #ffd56b;
+  --danger: #ff8a9a;
+  --success: #7cf0c1;
+  --radius: 20px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, #3a1c71 0%, #5b3fa8 40%, #d76d77 75%, #ffaf7b 100%);
+  background-attachment: fixed;
+}
+
+/* Floating color blobs that the glass blurs */
+.bg { position: fixed; inset: 0; overflow: hidden; z-index: -1; }
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(10px);
+  opacity: 0.75;
+  animation: float 18s ease-in-out infinite alternate;
+}
+.b1 { width: 420px; height: 420px; background: #00d2ff; top: -120px; left: -80px; }
+.b2 { width: 360px; height: 360px; background: #ff5f9e; bottom: -100px; right: -60px; animation-delay: -6s; }
+.b3 { width: 260px; height: 260px; background: #ffd56b; top: 45%; left: 55%; animation-delay: -12s; }
+@keyframes float {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(60px, 40px) scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) { .blob { animation: none; } }
+
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+a { color: inherit; }
+
+/* ---------- Top bar ---------- */
+.topbar {
+  position: sticky;
+  top: 16px;
+  z-index: 10;
+  max-width: 1100px;
+  margin: 16px auto 0;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand { text-decoration: none; font-weight: 700; font-size: 1.2rem; letter-spacing: 0.3px; }
+.logo { color: var(--accent); margin-right: 4px; }
+nav { display: flex; gap: 6px; }
+nav a {
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  color: var(--text-dim);
+  transition: background 0.2s, color 0.2s;
+}
+nav a:hover { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+nav a.active { color: var(--text); background: var(--glass-bg-strong); border: 1px solid var(--glass-border); }
+
+/* ---------- Layout ---------- */
+main { max-width: 1100px; margin: 28px auto 60px; padding: 0 16px; }
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.page-head h1 { margin: 0; font-size: 2rem; }
+.page-head p { margin: 4px 0 0; color: var(--text-dim); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  padding: 22px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s, background 0.2s;
+}
+a.card:hover { transform: translateY(-4px); background: var(--glass-bg-strong); }
+.card h3 { margin: 0; font-size: 1.25rem; }
+.card .desc { margin: 0; color: var(--text-dim); line-height: 1.45; flex: 1; }
+
+.meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; }
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  white-space: nowrap;
+}
+
+.progress { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
+.progress > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--success), #00d2ff);
+  border-radius: inherit;
+  transition: width 0.3s;
+}
+
+.empty { padding: 40px; text-align: center; color: var(--text-dim); }
+
+/* ---------- Buttons & forms ---------- */
+.btn {
+  font: inherit;
+  cursor: pointer;
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(10px);
+  transition: background 0.2s, transform 0.1s;
+}
+.btn:hover { background: rgba(255, 255, 255, 0.32); }
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: rgba(255, 213, 107, 0.85); color: #3a1c71; font-weight: 600; border-color: rgba(255, 255, 255, 0.6); }
+.btn.primary:hover { background: #ffd56b; }
+.btn.ghost { background: transparent; }
+.btn.danger { color: #fff; background: rgba(255, 95, 120, 0.35); border-color: rgba(255, 138, 154, 0.6); }
+.btn.danger:hover { background: rgba(255, 95, 120, 0.55); }
+.btn.small { padding: 6px 12px; font-size: 0.85rem; }
+.icon-btn {
+  font: inherit;
+  cursor: pointer;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+.icon-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.15); }
+
+label { display: block; font-size: 0.9rem; color: var(--text-dim); margin: 12px 0 6px; }
+input, textarea, select {
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.5); }
+input:focus, textarea:focus, select:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.2); }
+select option { color: #222; }
+textarea { resize: vertical; min-height: 90px; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+.form-error { color: var(--danger); min-height: 1.2em; margin: 10px 0 0; font-size: 0.9rem; }
+
+/* ---------- Issue detail ---------- */
+.back { display: inline-block; margin-bottom: 14px; color: var(--text-dim); text-decoration: none; }
+.back:hover { color: var(--text); }
+
+.detail { padding: 28px; margin-bottom: 22px; }
+.detail h1 { margin: 0 0 10px; font-size: 2.1rem; }
+.detail .desc { color: var(--text-dim); line-height: 1.55; white-space: pre-wrap; }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.panel { padding: 24px; }
+.panel h2 { margin: 0 0 14px; font-size: 1.3rem; }
+
+.add-task {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+@media (max-width: 640px) { .add-task { grid-template-columns: 1fr; } }
+
+.task-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.task {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.task.done .task-text { text-decoration: line-through; opacity: 0.6; }
+.task-text { flex: 1; }
+.task-text strong { color: var(--accent); }
+.task-text a { text-decoration: none; }
+.task-text a:hover { text-decoration: underline; }
+
+.check {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+}
+.check:checked { background: var(--success); border-color: var(--success); }
+.check:checked::after { content: "✓"; color: #24304a; font-weight: 800; font-size: 0.9rem; }
+
+/* ---------- Members ---------- */
+.avatar {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg, rgba(0, 210, 255, 0.6), rgba(255, 95, 158, 0.6));
+}
+.member-row { display: flex; align-items: center; gap: 14px; }
+
+/* ---------- Modal & toast ---------- */
+.modal {
+  width: min(480px, 92vw);
+  padding: 26px;
+  color: var(--text);
+  background: rgba(70, 40, 120, 0.55);
+}
+.modal::backdrop { background: rgba(15, 10, 40, 0.45); backdrop-filter: blur(4px); }
+.modal h2 { margin: 0 0 6px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 140%);
+  padding: 12px 22px;
+  background: rgba(40, 25, 80, 0.6);
+  transition: transform 0.3s;
+  z-index: 100;
+}
+.toast.show { transform: translate(-50%, 0); }
+.toast.error { border-color: var(--danger); }
+  </style>
+</head>
+<body>
+  <!-- Colorful blobs behind the frosted glass -->
+  <div class="bg" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <header class="glass topbar">
+    <a href="#/issues" class="brand">
+      <span class="logo">◈</span> Community Board
+    </a>
+    <nav>
+      <a href="#/issues" data-nav="issues">Issues</a>
+      <a href="#/members" data-nav="members">Members</a>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <!-- Reusable modal -->
+  <dialog id="modal" class="glass modal">
+    <form method="dialog" id="modal-form">
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+      <p class="form-error" id="modal-error"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary" id="modal-submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="glass toast" role="status"></div>
+
+  <script>
+// ---------- Database (stored in the browser's localStorage) ----------
+// Three tables, same rules as a real database:
+//   members (id, name UNIQUE, created_at)
+//   issues  (id, title, description, event_date, created_by -> members, created_at)
+//   tasks   (id, issue_id REQUIRED -> issues, member_id REQUIRED -> members, description, done, created_at)
+// A task cannot exist without an issue: deleting an issue deletes its tasks.
+const DB_KEY = "community-board-db-v1";
+const now = () => new Date().toISOString().slice(0, 19).replace("T", " ");
+
+function seedDb() {
+  const t = now();
+  return {
+    nextId: { members: 4, issues: 2, tasks: 4 },
+    members: [
+      { id: 1, name: "Susan", created_at: t },
+      { id: 2, name: "Joey", created_at: t },
+      { id: 3, name: "Maria", created_at: t },
+    ],
+    issues: [
+      { id: 1, title: "Potluck", description: "Neighborhood potluck at the park pavilion. Bring a dish to share!", event_date: "2026-11-21", created_by: 1, created_at: t },
+    ],
+    tasks: [
+      { id: 1, issue_id: 1, member_id: 2, description: "Bringing pizza", done: 0, created_at: t },
+      { id: 2, issue_id: 1, member_id: 1, description: "Bringing drinks", done: 0, created_at: t },
+      { id: 3, issue_id: 1, member_id: 3, description: "Bringing paper plates and napkins", done: 0, created_at: t },
+    ],
+  };
+}
+
+function loadDb() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DB_KEY));
+    if (d && d.members && d.issues && d.tasks) return d;
+  } catch {}
+  const d = seedDb();
+  localStorage.setItem(DB_KEY, JSON.stringify(d));
+  return d;
+}
+
+const saveDb = (d) => localStorage.setItem(DB_KEY, JSON.stringify(d));
+
+function insert(d, table, row) {
+  const full = { id: d.nextId[table]++, created_at: now(), ...row };
+  d[table].push(full);
+  return full;
+}
+
+// Validation helpers
+const fail = (message) => { throw new Error(message); };
+function text(value, field, { required = true, max = 500 } = {}) {
+  const s = typeof value === "string" ? value.trim() : "";
+  if (required && !s) fail(`${field} is required`);
+  if (s.length > max) fail(`${field} must be ${max} characters or fewer`);
+  return s;
+}
+function memberRef(d, value, { required = true } = {}) {
+  if (value === null || value === undefined || value === "") return required ? fail("A member is required") : null;
+  const id = Number(value);
+  if (!d.members.some((m) => m.id === id)) fail("That member does not exist");
+  return id;
+}
+const dateOrNull = (v) => (!v ? null : /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : fail("Date must be YYYY-MM-DD"));
+const find = (rows, id, label) => rows.find((r) => r.id === id) || fail(`${label} not found`);
+const nameOf = (d, id) => d.members.find((m) => m.id === id)?.name ?? null;
+
+// Same routes the app would call on a server, answered from localStorage.
+async function api(path, { method = "GET", body = {} } = {}) {
+  const d = loadDb();
+  const [resource, idStr, sub] = path.split("/").filter(Boolean);
+  const id = idStr ? Number(idStr) : null;
+  const done = (result) => { if (method !== "GET") saveDb(d); return result; };
+
+  if (resource === "members") {
+    if (!id && method === "GET")
+      return d.members
+        .map((m) => ({ ...m, task_count: d.tasks.filter((t) => t.member_id === m.id).length }))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+    if (!id && method === "POST") {
+      const name = text(body.name, "Name", { max: 60 });
+      if (d.members.some((m) => m.name.toLowerCase() === name.toLowerCase())) fail("A member with that name already exists");
+      return done(insert(d, "members", { name }));
+    }
+    const member = find(d.members, id, "Member");
+    if (method === "GET") {
+      const tasks = d.tasks
+        .filter((t) => t.member_id === id)
+        .map((t) => ({ ...t, issue_title: d.issues.find((i) => i.id === t.issue_id).title }));
+      return { ...member, tasks };
+    }
+    if (method === "DELETE") {
+      if (d.tasks.some((t) => t.member_id === id)) fail("This member still has tasks. Reassign or delete their tasks first.");
+      d.members = d.members.filter((m) => m.id !== id);
+      d.issues.forEach((i) => { if (i.created_by === id) i.created_by = null; });
+      return done(null);
+    }
+  }
+
+  if (resource === "issues") {
+    if (!id && method === "GET")
+      return d.issues
+        .map((i) => {
+          const tasks = d.tasks.filter((t) => t.issue_id === i.id);
+          return { ...i, created_by_name: nameOf(d, i.created_by), task_count: tasks.length, done_count: tasks.filter((t) => t.done).length };
+        })
+        .sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id);
+    if (!id && method === "POST")
+      return done(insert(d, "issues", {
+        title: text(body.title, "Title", { max: 120 }),
+        description: text(body.description, "Description", { required: false, max: 2000 }),
+        event_date: dateOrNull(body.event_date),
+        created_by: memberRef(d, body.created_by, { required: false }),
+      }));
+    const issue = find(d.issues, id, "Issue");
+    if (!sub && method === "GET") {
+      const tasks = d.tasks.filter((t) => t.issue_id === id).map((t) => ({ ...t, member_name: nameOf(d, t.member_id) }));
+      return { ...issue, created_by_name: nameOf(d, issue.created_by), tasks };
+    }
+    if (!sub && method === "PUT") {
+      Object.assign(issue, {
+        title: text(body.title, "Title", { max: 120 }),
+        description: text(body.description, "Description", { required: false, max: 2000 }),
+        event_date: dateOrNull(body.event_date),
+        created_by: memberRef(d, body.created_by, { required: false }),
+      });
+      return done(issue);
+    }
+    if (!sub && method === "DELETE") {
+      d.issues = d.issues.filter((i) => i.id !== id);
+      d.tasks = d.tasks.filter((t) => t.issue_id !== id); // cascade: tasks go with their issue
+      return done(null);
+    }
+    // Tasks can only be created under an existing issue.
+    if (sub === "tasks" && method === "POST")
+      return done(insert(d, "tasks", {
+        issue_id: id,
+        member_id: memberRef(d, body.member_id),
+        description: text(body.description, "Task", { max: 200 }),
+        done: 0,
+      }));
+  }
+
+  if (resource === "tasks" && id) {
+    const task = find(d.tasks, id, "Task");
+    if (method === "PATCH") {
+      if (body.member_id !== undefined) task.member_id = memberRef(d, body.member_id);
+      if (body.description !== undefined) task.description = text(body.description, "Task", { max: 200 });
+      if (body.done !== undefined) task.done = body.done ? 1 : 0;
+      return done(task);
+    }
+    if (method === "DELETE") {
+      d.tasks = d.tasks.filter((t) => t.id !== id);
+      return done(null);
+    }
+  }
+
+  fail("Not found");
+}
+
+// Community Board: members, issues, and tasks. Everything is in this one file.
+const app = document.getElementById("app");
+
+// ---------- Utilities ----------
+const esc = (s) =>
+  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+}
+
+const initials = (name) => name.split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+
+let toastTimer;
+function toast(message, isError = false) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.classList.toggle("error", isError);
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+function memberOptions(members, selectedId, { allowNone = false, placeholder = "Choose a member" } = {}) {
+  return (
+    (allowNone ? `<option value="">— None —</option>` : `<option value="" disabled ${selectedId ? "" : "selected"}>${placeholder}</option>`) +
+    members.map((m) => `<option value="${m.id}" ${m.id === selectedId ? "selected" : ""}>${esc(m.name)}</option>`).join("")
+  );
+}
+
+// ---------- Modal ----------
+const modal = document.getElementById("modal");
+const modalForm = document.getElementById("modal-form");
+let modalSubmit = null;
+
+function openModal({ title, body, submitLabel = "Save", danger = false, onSubmit }) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-body").innerHTML = body;
+  document.getElementById("modal-error").textContent = "";
+  const submit = document.getElementById("modal-submit");
+  submit.textContent = submitLabel;
+  submit.className = `btn ${danger ? "danger" : "primary"}`;
+  modalSubmit = onSubmit;
+  modal.showModal();
+  modal.querySelector("input, textarea, select")?.focus();
+}
+
+modalForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const values = Object.fromEntries(new FormData(modalForm));
+  try {
+    await modalSubmit(values);
+    modal.close();
+  } catch (err) {
+    document.getElementById("modal-error").textContent = err.message;
+  }
+});
+document.getElementById("modal-cancel").addEventListener("click", () => modal.close());
+
+function confirmAction(title, message, onConfirm) {
+  openModal({ title, body: `<p>${esc(message)}</p>`, submitLabel: "Delete", danger: true, onSubmit: onConfirm });
+}
+
+// ---------- Views ----------
+async function issuesView() {
+  const issues = await api("/issues");
+  app.innerHTML = `
+    <div class="page-head">
+      <div>
+        <h1>Issues</h1>
+        <p>Everything happening in the community. Everyone can see every issue.</p>
+      </div>
+      <button class="btn primary" id="new-issue">+ New issue</button>
+    </div>
+    ${
+      issues.length
+        ? `<div class="grid">${issues.map(issueCard).join("")}</div>`
+        : `<div class="glass empty">No issues yet. Start one, like a potluck or a cleanup day.</div>`
+    }`;
+  document.getElementById("new-issue").onclick = () => issueForm();
+}
+
+function issueCard(i) {
+  const pct = i.task_count ? Math.round((i.done_count / i.task_count) * 100) : 0;
+  return `
+    <a class="glass card" href="#/issues/${i.id}">
+      <h3>${esc(i.title)}</h3>
+      <p class="desc">${esc(i.description) || "<em>No description</em>"}</p>
+      <div class="meta">
+        ${i.event_date ? `<span class="chip">📅 ${formatDate(i.event_date)}</span>` : ""}
+        ${i.created_by_name ? `<span class="chip">👤 ${esc(i.created_by_name)}</span>` : ""}
+        <span class="chip">✅ ${i.done_count}/${i.task_count} tasks</span>
+      </div>
+      <div class="progress"><span style="width:${pct}%"></span></div>
+    </a>`;
+}
+
+async function issueForm(issue) {
+  const members = await api("/members");
+  openModal({
+    title: issue ? "Edit issue" : "New issue",
+    submitLabel: issue ? "Save changes" : "Create issue",
+    body: `
+      <label for="f-title">Title</label>
+      <input id="f-title" name="title" required maxlength="120" placeholder="e.g. Potluck" value="${esc(issue?.title)}" />
+      <label for="f-desc">Description</label>
+      <textarea id="f-desc" name="description" maxlength="2000" placeholder="What's it about?">${esc(issue?.description)}</textarea>
+      <label for="f-date">Date (optional)</label>
+      <input id="f-date" name="event_date" type="date" value="${esc(issue?.event_date)}" />
+      <label for="f-by">Organizer (optional)</label>
+      <select id="f-by" name="created_by">${memberOptions(members, issue?.created_by, { allowNone: true })}</select>`,
+    onSubmit: async (v) => {
+      if (issue) {
+        await api(`/issues/${issue.id}`, { method: "PUT", body: v });
+        toast("Issue updated");
+        route();
+      } else {
+        const created = await api("/issues", { method: "POST", body: v });
+        toast("Issue created");
+        location.hash = `#/issues/${created.id}`;
+      }
+    },
+  });
+}
+
+async function issueDetailView(id) {
+  const [issue, members] = await Promise.all([api(`/issues/${id}`), api("/members")]);
+  const done = issue.tasks.filter((t) => t.done).length;
+  const pct = issue.tasks.length ? Math.round((done / issue.tasks.length) * 100) : 0;
+
+  app.innerHTML = `
+    <a class="back" href="#/issues">← All issues</a>
+    <section class="glass detail">
+      <div class="page-head" style="margin-bottom:8px">
+        <h1>${esc(issue.title)}</h1>
+        <div class="detail-actions">
+          <button class="btn small" id="edit-issue">Edit</button>
+          <button class="btn small danger" id="delete-issue">Delete</button>
+        </div>
+      </div>
+      <div class="meta" style="margin-bottom:14px">
+        ${issue.event_date ? `<span class="chip">📅 ${formatDate(issue.event_date)}</span>` : ""}
+        ${issue.created_by_name ? `<span class="chip">👤 Organized by ${esc(issue.created_by_name)}</span>` : ""}
+        <span class="chip">✅ ${done}/${issue.tasks.length} done</span>
+      </div>
+      ${issue.description ? `<p class="desc">${esc(issue.description)}</p>` : ""}
+      <div class="progress"><span style="width:${pct}%"></span></div>
+    </section>
+
+    <section class="glass panel">
+      <h2>Tasks</h2>
+      ${
+        members.length
+          ? `<form class="add-task" id="add-task">
+               <select name="member_id" required aria-label="Member">${memberOptions(members, null, { placeholder: "Who?" })}</select>
+               <input name="description" required maxlength="200" placeholder="What are they doing? e.g. Bringing pizza" aria-label="Task" />
+               <button class="btn primary" type="submit">Add task</button>
+             </form>`
+          : `<p class="desc">Add a <a href="#/members">member</a> first, then you can assign tasks.</p>`
+      }
+      ${
+        issue.tasks.length
+          ? `<ul class="task-list">${issue.tasks.map(taskRow).join("")}</ul>`
+          : `<p class="desc">No tasks yet. Add the first one above.</p>`
+      }
+    </section>`;
+
+  document.getElementById("edit-issue").onclick = () => issueForm(issue);
+  document.getElementById("delete-issue").onclick = () =>
+    confirmAction("Delete issue?", `"${issue.title}" and all ${issue.tasks.length} of its tasks will be removed.`, async () => {
+      await api(`/issues/${issue.id}`, { method: "DELETE" });
+      toast("Issue deleted");
+      location.hash = "#/issues";
+    });
+
+  const addForm = document.getElementById("add-task");
+  if (addForm) {
+    addForm.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api(`/issues/${issue.id}/tasks`, { method: "POST", body: Object.fromEntries(new FormData(addForm)) });
+        toast("Task added");
+        await route();
+        document.querySelector("#add-task input")?.focus();
+      } catch (err) {
+        toast(err.message, true);
+      }
+    };
+  }
+
+  app.querySelectorAll(".task").forEach((li) => {
+    const task = issue.tasks.find((t) => t.id === Number(li.dataset.id));
+    li.querySelector(".check").onchange = async (e) => {
+      try {
+        await api(`/tasks/${task.id}`, { method: "PATCH", body: { done: e.target.checked } });
+        route();
+      } catch (err) {
+        toast(err.message, true);
+      }
+    };
+    li.querySelector("[data-act=edit]").onclick = () =>
+      openModal({
+        title: "Edit task",
+        body: `
+          <label for="t-member">Member</label>
+          <select id="t-member" name="member_id" required>${memberOptions(members, task.member_id)}</select>
+          <label for="t-desc">Task</label>
+          <input id="t-desc" name="description" required maxlength="200" value="${esc(task.description)}" />`,
+        onSubmit: async (v) => {
+          await api(`/tasks/${task.id}`, { method: "PATCH", body: v });
+          toast("Task updated");
+          route();
+        },
+      });
+    li.querySelector("[data-act=delete]").onclick = () =>
+      confirmAction("Delete task?", `${task.member_name}: ${task.description}`, async () => {
+        await api(`/tasks/${task.id}`, { method: "DELETE" });
+        toast("Task deleted");
+        route();
+      });
+  });
+}
+
+function taskRow(t) {
+  return `
+    <li class="task ${t.done ? "done" : ""}" data-id="${t.id}">
+      <input type="checkbox" class="check" ${t.done ? "checked" : ""} aria-label="Mark done" />
+      <span class="task-text"><a href="#/members/${t.member_id}"><strong>${esc(t.member_name)}</strong></a> — ${esc(t.description)}</span>
+      <button class="icon-btn" data-act="edit" title="Edit task">✎</button>
+      <button class="icon-btn" data-act="delete" title="Delete task">✕</button>
+    </li>`;
+}
+
+async function membersView() {
+  const members = await api("/members");
+  app.innerHTML = `
+    <div class="page-head">
+      <div>
+        <h1>Members</h1>
+        <p>${members.length} ${members.length === 1 ? "person" : "people"} in the community.</p>
+      </div>
+      <button class="btn primary" id="new-member">+ Add member</button>
+    </div>
+    ${
+      members.length
+        ? `<div class="grid">${members
+            .map(
+              (m) => `
+              <a class="glass card member-row" href="#/members/${m.id}">
+                <span class="avatar">${esc(initials(m.name))}</span>
+                <div>
+                  <h3>${esc(m.name)}</h3>
+                  <span class="desc">${m.task_count} ${m.task_count === 1 ? "task" : "tasks"}</span>
+                </div>
+              </a>`
+            )
+            .join("")}</div>`
+        : `<div class="glass empty">No members yet.</div>`
+    }`;
+
+  document.getElementById("new-member").onclick = () =>
+    openModal({
+      title: "Add member",
+      submitLabel: "Add",
+      body: `<label for="m-name">Name</label><input id="m-name" name="name" required maxlength="60" placeholder="e.g. Susan" />`,
+      onSubmit: async (v) => {
+        await api("/members", { method: "POST", body: v });
+        toast(`${v.name.trim()} joined the community`);
+        route();
+      },
+    });
+}
+
+async function memberDetailView(id) {
+  const m = await api(`/members/${id}`);
+  // Group tasks by issue
+  const byIssue = new Map();
+  for (const t of m.tasks) {
+    if (!byIssue.has(t.issue_id)) byIssue.set(t.issue_id, { title: t.issue_title, tasks: [] });
+    byIssue.get(t.issue_id).tasks.push(t);
+  }
+
+  app.innerHTML = `
+    <a class="back" href="#/members">← All members</a>
+    <section class="glass detail">
+      <div class="page-head" style="margin-bottom:0">
+        <div class="member-row">
+          <span class="avatar">${esc(initials(m.name))}</span>
+          <div>
+            <h1 style="margin:0">${esc(m.name)}</h1>
+            <span class="desc">Member since ${new Date(m.created_at + "Z").toLocaleDateString()}</span>
+          </div>
+        </div>
+        <button class="btn small danger" id="delete-member">Remove member</button>
+      </div>
+    </section>
+    <section class="glass panel">
+      <h2>${esc(m.name)}'s tasks</h2>
+      ${
+        byIssue.size
+          ? [...byIssue.entries()]
+              .map(
+                ([issueId, g]) => `
+                <h3 style="margin:18px 0 8px"><a href="#/issues/${issueId}">${esc(g.title)}</a></h3>
+                <ul class="task-list">
+                  ${g.tasks
+                    .map((t) => `<li class="task ${t.done ? "done" : ""}"><span class="task-text">${t.done ? "✅" : "⬜"} ${esc(t.description)}</span></li>`)
+                    .join("")}
+                </ul>`
+              )
+              .join("")
+          : `<p class="desc">No tasks yet. Open an issue to assign one.</p>`
+      }
+    </section>`;
+
+  document.getElementById("delete-member").onclick = () =>
+    confirmAction("Remove member?", `${m.name} will be removed from the community.`, async () => {
+      await api(`/members/${m.id}`, { method: "DELETE" });
+      toast("Member removed");
+      location.hash = "#/members";
+    });
+}
+
+// ---------- Router ----------
+async function route() {
+  const [, section = "issues", id] = location.hash.replace(/^#/, "").split("/");
+  document.querySelectorAll("nav a").forEach((a) => a.classList.toggle("active", a.dataset.nav === section));
+  try {
+    if (section === "members") return id ? await memberDetailView(id) : await membersView();
+    return id ? await issueDetailView(id) : await issuesView();
+  } catch (err) {
+    app.innerHTML = `<div class="glass empty">${esc(err.message)}<br /><br /><a href="#/issues">Back to issues</a></div>`;
+  }
+}
+
+window.addEventListener("hashchange", route);
+// Keep other open tabs in sync.
+window.addEventListener("storage", (e) => { if (e.key === DB_KEY && !modal.open) route(); });
+route();
+  </script>
+</body>
+</html>
